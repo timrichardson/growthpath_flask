@@ -1,0 +1,18 @@
+*To update the database (while still in development mode):
+
+from a console
+
+python manage.py db upgrade
+
+
+
+*To manipulate the database
+
+from terminal
+python manage.py shell
+
+from app import db
+from app.models import User
+
+user_john = User(username='John)
+

@@ -7,7 +7,8 @@ from ..models import User
 from ..email import send_email
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm,\
     PasswordResetRequestForm, PasswordResetForm, ChangeEmailForm
-
+import os
+from oauth2client import client,crypt
 
 @auth.before_app_request
 def before_request():
@@ -60,6 +61,65 @@ def register():
         flash('A confirmation email has been sent to you by email.')
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
+
+
+# *********************** Receive Google Token NOT FINISHED ******************/
+
+
+@auth.route('/receive_idtoken', methods=['POST'])  # gives us the idtoken. This url is hardcoded in login.html
+def receive_idtoken():
+    idtoken = request.form['idtoken']
+    try:
+        idinfo = client.verify_id_token(idtoken, os.environ.get('GOOGLE_CLIENT_ID'))
+        # If multiple clients access the backend server:
+        if idinfo['aud'] not in [os.environ.get('GOOGLE_CLIENT_ID')]:
+            flash('Error with google client id configuration')
+            raise crypt.AppIdentityError("Unrecognized client.")
+        if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+            raise crypt.AppIdentityError("Wrong issuer.")
+            # if idinfo['hd'] != APPS_DOMAIN_NAME:
+            #     raise crypt.AppIdentityError("Wrong hosted domain.")
+    except crypt.AppIdentityError:
+        pass  # invalid token
+
+    # the identifier from google is idinfo['sub']
+    # does this match a user we have
+    # if it does then log in else else fail
+    user = User.query.filter_by(email=idinfo['email']).first()
+    if user is not None:
+        login_user(user,remember=True)
+        return redirect(request.args.get('next') or url_for('main.index'))
+    else:
+        flash('Your email address is not linked to a user')
+        return redirect(url_for('auth.login'))
+    #session.userid = idinfo['sub']
+    # session.fullname =
+    # if we go here something went wrong
+
+    return redirect(url_for('auth.login'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @auth.route('/confirm/<token>')

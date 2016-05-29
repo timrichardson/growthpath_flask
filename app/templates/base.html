@@ -1,11 +1,14 @@
 {% extends "bootstrap/base.html" %}
 
-{% block title %}Flasky{% endblock %}
+{% block title %}GrowthPath Default Flask App{% endblock %}
 
 {% block head %}
 {{ super() }}
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<meta name="google-signin-scope" content="profile email">
+<meta name="google-signin-client_id" content="11429088505-0e9pn7d6f26iill87i48643na7si354a.apps.googleusercontent.com">
+<script src="https://apis.google.com/js/platform.js" async defer></script>
 {% endblock %}
 
 {% block navbar %}
